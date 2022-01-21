@@ -5,9 +5,7 @@ key with corresponding function name and how many times was repeated.
 It ignores regular typing, mouse drag, minibuffer commands not
 executed by pressing keys and other random undefined bindings.
 
-[demo-video](demo.mp4)
-
-![screenshot](screenshot.png)
+![demo](demo.gif)
 
 ## Requirements
 
