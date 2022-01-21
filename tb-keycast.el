@@ -22,10 +22,10 @@
 
 ;;; Commentary:
 
-;; Simple keycas that shows in tab-bar line last pressed key with
-;; corresponding command and how many times was repeated.  It ignores
-;; regular typing, mouse drag, minibuffer commands not executed by
-;; pressing keys and other random undefined bindings.
+;; Simple global minor mode that shows in tab-bar line last pressed
+;; keys with corresponding command and how many times was repeated.
+;; It ignores regular typing, mouse drag, minibuffer commands not
+;; executed by pressing keys and other random undefined bindings.
 
 
 ;;; Code:
@@ -38,7 +38,6 @@
   :group 'environment
   :version "28.1")
 
-
 ;;;; Faces:
 
 (defface tb-keycast-key-face
@@ -47,35 +46,33 @@
   :group 'tb-keycast
   :group 'faces)
 
-(defface tb-keycast-cmd-face
+(defface tb-keycast-fun-name-face
   '((t :inherit (shadow) :slant italic))
   "Face of pressed key corresponding function name."
   :group 'tb-keycast
   :group 'faces)
 
-(defface tb-keycast-num-face
+(defface tb-keycast-repeat-number-face
   '((t :inherit (shadow)))
   "Face of number that shows repeat count."
   :group 'tb-keycast
   :group 'faces)
 
-
 ;;;; Vars:
 
 (defvar tb-keycast-version "1.0"
-  "tb-keycast version string")
+  "Version string of `tb-keycast-mode'.")
 
 (defvar tb-keycast-status ""
   "Last used binding with corresponding command.")
 
-(defvar tb-keycast-repeat 1
+(defvar tb-keycast--repeat 1
   "How many times last binding was used in a row.")
 
-
 ;;;; Functions:
 
-(defun tb-keycast-update ()
-  "Update `tb-keycast-status' and `tb-keycast-repeat' values.
+(defun tb-keycast--update ()
+  "Update `tb-keycast-status' and `tb-keycast--repeat' values.
 Force update of mode-line and by that udate tab-bar line."
   (when (and
          ;; Ignore undefined bindings
@@ -87,54 +84,55 @@ Force update of mode-line and by that udate tab-bar line."
 
          ;; Ignore mouse drag
          (not (string-match "^#"
-                         (format "%s" this-command)))
+                            (format "%s" this-command)))
          
          ;; Ignore minibuffer commands
          (not (string-match (format ".+%s" this-command)
                             (format "%s" (this-command-keys)))))
 
     ;; TODO Repeat does not work for kill-line (C-k)
-    (setq tb-keycast-repeat
+    (setq tb-keycast--repeat
           (if (eq last-command this-command)
-              (1+ tb-keycast-repeat) 1))
+              (1+ tb-keycast--repeat) 1))
 
     (setq tb-keycast-status
-          (let ((key (format " %s" (key-description (this-command-keys))))
-                (cmd (format " %s" this-command))
-                (num (if (> tb-keycast-repeat 1)
-                         (format " x%s" tb-keycast-repeat)
-                       "")))
-
-            (concat (propertize key 'face 'tb-keycast-key-face)
-                    (propertize cmd 'face 'tb-keycast-cmd-face)
-                    (propertize num 'face 'tb-keycast-num-face))))
+          (format " %s %s %s"
+                  (propertize (key-description (this-command-keys))
+                              'face 'tb-keycast-key-face)
+                  (propertize (symbol-name this-command)
+                              'face 'tb-keycast-fun-name-face)
+                  (propertize (if (> tb-keycast--repeat 1)
+                                  (format "x%s" tb-keycast--repeat) "")
+                              'face 'tb-keycast-repeat-number-face)))
 
     ;; force-mode-line-update also updates tab-bar line
     (force-mode-line-update)))
 
-(defun tb-keycast-format ()
-  "Keycast format for tab-bar mode that works with in
-tab-bar-format variable"
+(defun tb-keycast--format ()
+  "Keycast format for `tab-bar-format' variable."
   `((global menu-item ,(string-trim-right tb-keycast-status) ignore)))
 
-(defun tb-keycast-start ()
-  "Log in tab-bar last pressed binding with corresponding
-function and how many times it was repeated in row."
-  (interactive)
+(defun tb-keycast--start ()
+  "Enable keycast."
   (tab-bar-mode 1)
   (add-to-list 'tab-bar-format 'tb-keycast-format t)
-  (add-hook 'pre-command-hook 'tb-keycast-update 90))
+  (add-hook 'pre-command-hook 'tb-keycast--update 90))
 
-(defun tb-keycast-stop ()
+(defun tb-keycast--stop ()
   "Disable keycast."
-  (interactive)
-  (remove-hook 'pre-command-hook 'tb-keycast-update)
+  (remove-hook 'pre-command-hook 'tb-keycast--update)
   (setq tb-keycast-status "")
   (force-mode-line-update))
 
-
-;;;; Provide:
+(define-minor-mode tb-keycast-mode
+  "Global minor mode that shows last pressed key in `tab-bar-mode' line.
+Print corresponding function name along with key binding and
+nomber of how many times it was repeated."
+  :global t
+  :lighter nil
+  (if tb-keycast-mode (tb-keycast--start) (tb-keycast--stop)))
 
+
 (provide 'tb-keycast)
 
 ;;; tb-keycast.el ends here
