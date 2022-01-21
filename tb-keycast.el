@@ -22,8 +22,8 @@
 
 ;;; Commentary:
 
-;; Simple global minor mode that shows in tab-bar line last pressed
-;; keys with corresponding command and how many times was repeated.
+;; Global minor mode that shows in tab-bar-mode line last pressed keys
+;; with corresponding function name and how many times was repeated.
 ;; It ignores regular typing, mouse drag, minibuffer commands not
 ;; executed by pressing keys and other random undefined bindings.
 
