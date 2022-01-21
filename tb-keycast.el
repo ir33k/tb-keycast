@@ -115,7 +115,7 @@ Force update of mode-line and by that udate tab-bar line."
 (defun tb-keycast--start ()
   "Enable keycast."
   (tab-bar-mode 1)
-  (add-to-list 'tab-bar-format 'tb-keycast-format t)
+  (add-to-list 'tab-bar-format 'tb-keycast--format t)
   (add-hook 'pre-command-hook 'tb-keycast--update 90))
 
 (defun tb-keycast--stop ()
