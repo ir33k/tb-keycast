@@ -41,19 +41,19 @@
 ;;;; Faces:
 
 (defface tb-keycast-key-face
-  '((t :inherit (shadow) :weight bold))
+  '((t :inherit shadow :weight bold))
   "Face of pressed key."
   :group 'tb-keycast
   :group 'faces)
 
 (defface tb-keycast-fun-name-face
-  '((t :inherit (shadow) :slant italic))
+  '((t :inherit shadow :slant italic))
   "Face of pressed key corresponding function name."
   :group 'tb-keycast
   :group 'faces)
 
 (defface tb-keycast-repeat-number-face
-  '((t :inherit (shadow)))
+  '((t :inherit shadow))
   "Face of number that shows repeat count."
   :group 'tb-keycast
   :group 'faces)
