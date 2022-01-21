@@ -96,25 +96,28 @@ Force update of mode-line and by that udate tab-bar line."
               (1+ tb-keycast--repeat) 1))
 
     (setq tb-keycast-status
-          (format " %s %s %s"
+          (format "%s%s %s"
                   (propertize (key-description (this-command-keys))
                               'face 'tb-keycast-key-face)
-                  (propertize (symbol-name this-command)
-                              'face 'tb-keycast-fun-name-face)
                   (propertize (if (> tb-keycast--repeat 1)
-                                  (format "x%s" tb-keycast--repeat) "")
-                              'face 'tb-keycast-repeat-number-face)))
+                                  (format " x%s" tb-keycast--repeat) "")
+                              'face 'tb-keycast-repeat-number-face)
+                  (propertize (symbol-name this-command)
+                              'face 'tb-keycast-fun-name-face)))
 
     ;; force-mode-line-update also updates tab-bar line
     (force-mode-line-update)))
 
 (defun tb-keycast--format ()
   "Keycast format for `tab-bar-format' variable."
-  `((global menu-item ,(string-trim-right tb-keycast-status) ignore)))
+  ;; set min width to avoid constant jumps to right and left
+  (format " %-32s " tb-keycast-status))
 
 (defun tb-keycast--start ()
   "Enable keycast."
   (tab-bar-mode 1)
+  ;; put tb-keycast-status on right side
+  (add-to-list 'tab-bar-format 'tab-bar-format-align-right t)
   (add-to-list 'tab-bar-format 'tb-keycast--format t)
   (add-hook 'pre-command-hook 'tb-keycast--update 90))
 
