@@ -11,6 +11,6 @@ executed by pressing keys and other random undefined bindings.
 
 ## Requirements
 
-**Emacs version 8.1 or higher is required**.
+**Emacs version 28.1 or higher is required**.
 
 You need to have `tab-bar-format` variable.
