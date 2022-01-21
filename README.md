@@ -7,6 +7,8 @@ executed by pressing keys and other random undefined bindings.
 
 ![demo-video](tb-keycast.mp4)
 
+![screenshot](screenshot.png)
+
 ## Requirements
 
 **Emacs version 8.1 or higher is required**.
