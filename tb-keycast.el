@@ -60,10 +60,10 @@
 
 ;;;; Vars:
 
-(defvar tb-keycast-version "1.0"
+(defconst tb-keycast-version "1.0"
   "Version string of `tb-keycast-mode'.")
 
-(defvar tb-keycast-status ""
+(defvar tb-keycast--status ""
   "Last used binding with corresponding command.")
 
 (defvar tb-keycast--repeat 1
@@ -72,7 +72,7 @@
 ;;;; Functions:
 
 (defun tb-keycast--update ()
-  "Update `tb-keycast-status' and `tb-keycast--repeat' values.
+  "Update `tb-keycast--status' and `tb-keycast--repeat' values.
 Force update of mode-line and by that udate tab-bar line."
   (when (and
          ;; Ignore undefined bindings
@@ -95,7 +95,7 @@ Force update of mode-line and by that udate tab-bar line."
           (if (eq last-command this-command)
               (1+ tb-keycast--repeat) 1))
 
-    (setq tb-keycast-status
+    (setq tb-keycast--status
           (format "%s%s %s"
                   (propertize (key-description (this-command-keys))
                               'face 'tb-keycast-key-face)
@@ -111,12 +111,12 @@ Force update of mode-line and by that udate tab-bar line."
 (defun tb-keycast--format ()
   "Keycast format for `tab-bar-format' variable."
   ;; set min width to avoid constant jumps to right and left
-  (format " %-32s " tb-keycast-status))
+  (format " %-32s " tb-keycast--status))
 
 (defun tb-keycast--start ()
   "Enable keycast."
   (tab-bar-mode 1)
-  ;; put tb-keycast-status on right side
+  ;; put tb-keycast--status on right side
   (add-to-list 'tab-bar-format 'tab-bar-format-align-right t)
   (add-to-list 'tab-bar-format 'tb-keycast--format t)
   (add-hook 'pre-command-hook 'tb-keycast--update 90))
@@ -124,7 +124,7 @@ Force update of mode-line and by that udate tab-bar line."
 (defun tb-keycast--stop ()
   "Disable keycast."
   (remove-hook 'pre-command-hook 'tb-keycast--update)
-  (setq tb-keycast-status "")
+  (setq tb-keycast--status "")
   (force-mode-line-update))
 
 (define-minor-mode tb-keycast-mode
