@@ -1,6 +1,6 @@
 ;;; tb-keycast.el --- Tab Bar Keycast -*- lexical-binding: t -*-
 
-;; Version: 1.2
+;; Version: 1.3
 ;; Keywords: keycast, tab-bar
 ;; Author: irek <mail@gumen.pl>
 ;; URL: https://github.com/ir33k/tb-keycast
@@ -60,7 +60,7 @@
 
 ;;;; Vars:
 
-(defconst tb-keycast-version "1.2"
+(defconst tb-keycast-version "1.3"
   "Version string of `tb-keycast-mode'.")
 
 (defvar tb-keycast--status ""
@@ -105,32 +105,52 @@ Force update of mode-line and by that udate tab-bar line."
                   (propertize (symbol-name this-command)
                               'face 'tb-keycast-fun-name-face)))
 
+    ;; Set min width to avoid constant jumps to right and left.
+    (setq tb-keycast--status (format " %-32s " tb-keycast--status))
+
     ;; `force-mode-line-update' also updates tab-bar line.
     (force-mode-line-update)))
 
+(defun tb-keycast--format-clear ()
+  "Return `tab-bar-format' without `tb-keycast--format'."
+  (seq-remove (lambda (x) (eq x 'tb-keycast--format)) tab-bar-format))
+
+(defun tb-keycast--format-wraps-p ()
+  "Return not nil if new status value will wrap to next line."
+  (let* ((window-width (window-pixel-width))
+	 (format-list (tab-bar-format-list (tb-keycast--format-clear)))
+	 (tabs-text (mapconcat (lambda (x) (nth 2 x)) format-list ""))
+	 (tabs-width (string-pixel-width tabs-text))
+	 (status (string-pixel-width tb-keycast--status)))
+
+    (while (> tabs-width window-width)
+      (setq tabs-width (- tabs-width window-width)))
+
+    (< window-width (+ tabs-width status))))
+
 (defun tb-keycast--format ()
   "Keycast format for `tab-bar-format' variable."
-  ;; Set min width to avoid constant jumps to right and left.
-  (format " %-32s " tb-keycast--status))
+  ;; Move status to next line if tabs width would cause it to wrap.
+  (if (tb-keycast--format-wraps-p)
+      (concat "\n" tb-keycast--status)
+    tb-keycast--status))
 
 (defun tb-keycast--start ()
   "Enable keycast."
   (tab-bar-mode 1)
-  ;; Put `tb-keycast--status' on right side.
-  (add-to-list 'tab-bar-format 'tab-bar-format-align-right t)
   (add-to-list 'tab-bar-format 'tb-keycast--format t)
   (add-hook 'pre-command-hook 'tb-keycast--update 90))
 
 (defun tb-keycast--stop ()
   "Disable keycast."
   (remove-hook 'pre-command-hook 'tb-keycast--update)
-  (setq tb-keycast--status "")
+  (setq tab-bar-format (tb-keycast--format-clear))
   (force-mode-line-update))
 
 (define-minor-mode tb-keycast-mode
   "Global minor mode that shows last pressed key in `tab-bar-mode' line.
 Print corresponding function name along with key binding and
-nomber of how many times it was repeated."
+number of how many times it was repeated."
   :global t
   :lighter nil
   (if tb-keycast-mode (tb-keycast--start) (tb-keycast--stop)))

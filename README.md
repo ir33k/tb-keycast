@@ -39,3 +39,8 @@ Use `M-x load-file<RET>path_to/tb-keycast.el<RET>` or load with code:
 ## Usage
 
 Toggle with `M-x tb-keycast-mode`.
+
+
+## Note
+
+Tested only on Emacs 29.0.
