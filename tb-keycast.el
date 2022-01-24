@@ -102,7 +102,9 @@ Force update of mode-line and by that udate tab-bar line."
                   (propertize (if (> tb-keycast--repeat 1)
                                   (format " x%s" tb-keycast--repeat) "")
                               'face 'tb-keycast-repeat-number-face)
-                  (propertize (symbol-name this-command)
+                  (propertize (if (symbolp this-command)
+                                  (symbol-name this-command)
+                                (format "%S" this-command))
                               'face 'tb-keycast-fun-name-face)))
 
     ;; Set min width to avoid constant jumps to right and left.
