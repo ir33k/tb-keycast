@@ -44,7 +44,7 @@ Toggle with `M-x tb-keycast-mode`.
 
 ```elisp
 (setq tab-bar-format nil)               ; Hide tabs if not used.
-(setq tb-keycast-status-align 'left)    ; Align tabs to the left.
+(setq tb-keycast-status-align 'left)    ; Align status to the left.
 
 ;; Disable min-width that makes `tb-keycast' always reserve some space
 ;; to avoid jumping from left to right.  But when tabs are hidden and
