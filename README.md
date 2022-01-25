@@ -52,10 +52,18 @@ Toggle with `M-x tb-keycast-mode`.
 ;; to none sense and can be disabled.
 (setq tb-keycast-status-min-width 0)
 
-(tb-keycast-mode 1)                     ; Enable tb-keycast.
+;; Modify face.
+(set-face-attribute 'tb-keycast-face nil
+                    :background "black"
+                    :foreground "#88FFAA"
+                    :slant 'normal
+                    :weight 'bold)
+
+;; Enable `tb-keycast-mode'.
+(tb-keycast-mode 1)
 ```
 
 ## Note
 
 - Tested only on Emacs 29.0.
-- Repeat counter does not work for `C-k (kill-line)`.
+- Counter does not work for `C-k (kill-line)`.

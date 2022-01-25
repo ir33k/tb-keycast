@@ -1,6 +1,6 @@
 ;;; tb-keycast.el --- Tab Bar Keycast -*- lexical-binding: t -*-
 
-;; Version: 1.4
+;; Version: 1.5
 ;; Keywords: keycast, tab-bar
 ;; Author: irek <mail@gumen.pl>
 ;; URL: https://github.com/ir33k/tb-keycast
@@ -38,27 +38,11 @@
   :group 'environment
   :version "28.1")
 
-;;;; Faces:
-
-(defface tb-keycast-key-face
-  '((t :inherit shadow :weight bold))
-  "Face of pressed key."
+(defface tb-keycast-face
+  `((t :inherit 'shadow :slant italic))
+  "Face for `tb-keycast--status'."
   :group 'tb-keycast
   :group 'faces)
-
-(defface tb-keycast-fun-name-face
-  '((t :inherit shadow :slant italic))
-  "Face of pressed key corresponding function name."
-  :group 'tb-keycast
-  :group 'faces)
-
-(defface tb-keycast-repeat-number-face
-  '((t :inherit shadow))
-  "Face of number that shows repeat count."
-  :group 'tb-keycast
-  :group 'faces)
-
-;;;; Vars:
 
 (defcustom tb-keycast-status-align 'right
   "Align of tb-keycast status withing tab-bar line.
@@ -80,19 +64,17 @@ Set to 0 to disable."
   :group 'tb-keycast
   :type 'number)
 
-(defconst tb-keycast-version "1.4"
+(defconst tb-keycast-version "1.5"
   "Version string of `tb-keycast-mode'.")
 
 (defvar tb-keycast--status ""
   "Last used binding with corresponding command.")
 
-(defvar tb-keycast--repeat 1
+(defvar tb-keycast--counter 1
   "How many times last binding was used in a row.")
 
-;;;; Functions:
-
 (defun tb-keycast--update ()
-  "Update `tb-keycast--status' and `tb-keycast--repeat' values.
+  "Update `tb-keycast--status' and `tb-keycast--counter' values.
 Force update of mode-line and by that udate tab-bar line."
   (when (and
          ;; Ignore undefined bindings.
@@ -105,32 +87,41 @@ Force update of mode-line and by that udate tab-bar line."
          ;; Ignore mouse drag.
          (not (string-match "^#"
                             (format "%s" this-command)))
-         
+
          ;; Ignore minibuffer commands.
          (not (string-match (format ".+%s" this-command)
                             (format "%s" (this-command-keys)))))
 
-    ;; TODO Repeat number does not work for kill-line (C-k)
-    (setq tb-keycast--repeat
+    ;; TODO Counter does not work for kill-line (C-k).
+    (setq tb-keycast--counter
           (if (eq last-command this-command)
-              (1+ tb-keycast--repeat) 1))
+              (1+ tb-keycast--counter) 1))
 
+    ;; Set status value with lest pressed key, counter and fun name.
     (setq tb-keycast--status
-          (format " %s%s %s "
-                  (propertize (key-description (this-command-keys))
-                              'face 'tb-keycast-key-face)
-                  (propertize (if (> tb-keycast--repeat 1)
-                                  (format " x%s" tb-keycast--repeat)
-                                "")
-                              'face 'tb-keycast-repeat-number-face)
-                  (propertize (format "%s" this-command)
-                              'face 'tb-keycast-fun-name-face)))
+          (concat " "
+                  (key-description (this-command-keys))    ;key
+                  (if (> tb-keycast--counter 1)
+                      (format " x%s" tb-keycast--counter)) ;counter
+                  (format " (%s) " this-command)))         ;fun name
 
-    ;; Set min width to avoid constant jumps to right and left.
+    ;; Transform status value so it looks nice.
     (setq tb-keycast--status
-          (string-pad tb-keycast--status tb-keycast-status-min-width))
-    
-    ;; `force-mode-line-update' also updates tab-bar line.
+          (concat
+           ;; Add one space as left margin if `tab-bar-format' is not
+           ;; empty because we don't want status "glued" to tabs.
+           (if (not (eq tab-bar-format nil)) " ")
+
+           ;; Set min-width and apply face.
+           (propertize (string-pad tb-keycast--status
+                                   tb-keycast-status-min-width)
+                       'face 'tb-keycast-face)
+
+           ;; One space of margin on the right to stop face background
+           ;; color from going all the way to the right window edge.
+           " "))
+
+    ;; Invoke `force-mode-line-update' to updates tab-bar line.
     (force-mode-line-update)))
 
 (defun tb-keycast--format-clear ()
@@ -140,10 +131,10 @@ Force update of mode-line and by that udate tab-bar line."
 (defun tb-keycast--format-wraps-p ()
   "Return not nil if new status value will wrap to next line."
   (let* ((window-width (window-pixel-width))
-	 (format-list (tab-bar-format-list (tb-keycast--format-clear)))
-	 (tabs-text (mapconcat (lambda (x) (nth 2 x)) format-list ""))
-	 (tabs-width (string-pixel-width tabs-text))
-	 (status-width (string-pixel-width tb-keycast--status)))
+         (format-list (tab-bar-format-list (tb-keycast--format-clear)))
+         (tabs-text (mapconcat (lambda (x) (nth 2 x)) format-list ""))
+         (tabs-width (string-pixel-width tabs-text))
+         (status-width (string-pixel-width tb-keycast--status)))
 
     (while (> tabs-width window-width)
       (setq tabs-width (- tabs-width window-width)))
@@ -156,7 +147,7 @@ Force update of mode-line and by that udate tab-bar line."
    ;; Move status to next line if tabs width would cause it to wrap.
    (if (tb-keycast--format-wraps-p) "\n")
 
-   ;; Align to right if required
+   ;; Align to right if required.
    (if (eq tb-keycast-status-align 'right)
        (let* ((window-width (window-pixel-width))
               (status-width (string-pixel-width tb-keycast--status))
@@ -171,7 +162,8 @@ Force update of mode-line and by that udate tab-bar line."
   "Enable keycast."
   (tab-bar-mode 1)
   (add-to-list 'tab-bar-format 'tb-keycast--format t)
-  (add-hook 'pre-command-hook 'tb-keycast--update 90))
+  (add-hook 'pre-command-hook 'tb-keycast--update 90)
+  (tb-keycast--update))
 
 (defun tb-keycast--stop ()
   "Disable keycast."
@@ -182,7 +174,7 @@ Force update of mode-line and by that udate tab-bar line."
 (define-minor-mode tb-keycast-mode
   "Global minor mode that shows last pressed key in `tab-bar-mode' line.
 Print corresponding function name along with key binding and
-number of how many times it was repeated."
+counter of how many times it was repeated."
   :global t
   :lighter nil
   (if tb-keycast-mode (tb-keycast--start) (tb-keycast--stop)))
