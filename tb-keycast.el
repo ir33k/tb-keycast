@@ -60,6 +60,26 @@
 
 ;;;; Vars:
 
+(defcustom tb-keycast-status-align 'right
+  "Align of tb-keycast status withing tab-bar line.
+Value is a symbol either `left' or `right'."
+  :group 'tb-keycast
+  :type '(choice (const :tag "left" left)
+                 (const :tag "right" right)))
+
+(defcustom tb-keycast-status-min-width 32
+  "Minimal width (in character) that is taken by keycast status.
+
+If status is longer than provided value it will take more space
+anyway but having minimal width is useful to avoid jumping of
+status to left and right (when status is aligned to the right)
+and jumping to next tab-bar line when there are more tabs pushing
+status close to the right edge.
+
+Set to 0 to disable."
+  :group 'tb-keycast
+  :type 'number)
+
 (defconst tb-keycast-version "1.3"
   "Version string of `tb-keycast-mode'.")
 
@@ -96,18 +116,20 @@ Force update of mode-line and by that udate tab-bar line."
               (1+ tb-keycast--repeat) 1))
 
     (setq tb-keycast--status
-          (format "%s%s %s"
+          (format " %s%s %s "
                   (propertize (key-description (this-command-keys))
                               'face 'tb-keycast-key-face)
                   (propertize (if (> tb-keycast--repeat 1)
-                                  (format " x%s" tb-keycast--repeat) "")
+                                  (format " x%s" tb-keycast--repeat)
+                                "")
                               'face 'tb-keycast-repeat-number-face)
                   (propertize (format "%s" this-command)
                               'face 'tb-keycast-fun-name-face)))
 
     ;; Set min width to avoid constant jumps to right and left.
-    (setq tb-keycast--status (format " %-32s " tb-keycast--status))
-
+    (setq tb-keycast--status
+          (string-pad tb-keycast--status tb-keycast-status-min-width))
+    
     ;; `force-mode-line-update' also updates tab-bar line.
     (force-mode-line-update)))
 
@@ -121,19 +143,29 @@ Force update of mode-line and by that udate tab-bar line."
 	 (format-list (tab-bar-format-list (tb-keycast--format-clear)))
 	 (tabs-text (mapconcat (lambda (x) (nth 2 x)) format-list ""))
 	 (tabs-width (string-pixel-width tabs-text))
-	 (status (string-pixel-width tb-keycast--status)))
+	 (status-width (string-pixel-width tb-keycast--status)))
 
     (while (> tabs-width window-width)
       (setq tabs-width (- tabs-width window-width)))
 
-    (< window-width (+ tabs-width status))))
+    (< window-width (+ tabs-width status-width))))
 
 (defun tb-keycast--format ()
   "Keycast format for `tab-bar-format' variable."
-  ;; Move status to next line if tabs width would cause it to wrap.
-  (if (tb-keycast--format-wraps-p)
-      (concat "\n" tb-keycast--status)
-    tb-keycast--status))
+  (concat
+   ;; Move status to next line if tabs width would cause it to wrap.
+   (if (tb-keycast--format-wraps-p) "\n")
+
+   ;; Align to right if required
+   (if (eq tb-keycast-status-align 'right)
+       (let* ((window-width (window-pixel-width))
+              (status-width (string-pixel-width tb-keycast--status))
+              (hpos-px (- (window-pixel-width)
+                          (string-pixel-width tb-keycast--status))))
+         (propertize " " 'display `(space :align-to (,hpos-px)))))
+
+   ;; Print status.
+   tb-keycast--status))
 
 (defun tb-keycast--start ()
   "Enable keycast."
