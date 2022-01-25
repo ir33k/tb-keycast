@@ -110,7 +110,7 @@ Force update of mode-line and by that udate tab-bar line."
          (not (string-match (format ".+%s" this-command)
                             (format "%s" (this-command-keys)))))
 
-    ;; TODO Repeat does not work for kill-line (C-k)
+    ;; TODO Repeat number does not work for kill-line (C-k)
     (setq tb-keycast--repeat
           (if (eq last-command this-command)
               (1+ tb-keycast--repeat) 1))
