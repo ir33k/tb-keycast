@@ -130,16 +130,16 @@ Force update of mode-line and by that udate tab-bar line."
 
 (defun tb-keycast--format-wraps-p ()
   "Return not nil if new status value will wrap to next line."
-  (let* ((window-width (window-pixel-width))
+  (let* ((frame-width (frame-inner-width))
          (format-list (tab-bar-format-list (tb-keycast--format-clear)))
          (tabs-text (mapconcat (lambda (x) (nth 2 x)) format-list ""))
          (tabs-width (string-pixel-width tabs-text))
          (status-width (string-pixel-width tb-keycast--status)))
 
-    (while (> tabs-width window-width)
-      (setq tabs-width (- tabs-width window-width)))
+    (while (> tabs-width frame-width)
+      (setq tabs-width (- tabs-width frame-width)))
 
-    (< window-width (+ tabs-width status-width))))
+    (< frame-width (+ tabs-width status-width))))
 
 (defun tb-keycast--format ()
   "Keycast format for `tab-bar-format' variable."
@@ -149,10 +149,8 @@ Force update of mode-line and by that udate tab-bar line."
 
    ;; Align to right if required.
    (if (eq tb-keycast-status-align 'right)
-       (let* ((window-width (window-pixel-width))
-              (status-width (string-pixel-width tb-keycast--status))
-              (hpos-px (- (window-pixel-width)
-                          (string-pixel-width tb-keycast--status))))
+       (let ((hpos-px (- (frame-inner-width)
+                         (string-pixel-width tb-keycast--status))))
          (propertize " " 'display `(space :align-to (,hpos-px)))))
 
    ;; Print status.
