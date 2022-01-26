@@ -97,7 +97,7 @@ Force update of mode-line and by that udate tab-bar line."
           (if (eq last-command this-command)
               (1+ tb-keycast--counter) 1))
 
-    ;; Set status value with lest pressed key, counter and fun name.
+    ;; Set status value with last pressed key, counter and fun name.
     (setq tb-keycast--status
           (concat " "
                   (key-description (this-command-keys))    ;key
