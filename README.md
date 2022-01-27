@@ -59,6 +59,10 @@ Toggle with `M-x tb-keycast-mode`.
                     :slant 'normal
                     :weight 'bold)
 
+;; Modify list of ignored commands to control what not to show.
+;; See variable documentation for more details.
+(setq tb-keycast-ignore '(minibuffer-cmd))
+
 ;; Enable `tb-keycast-mode'.
 (tb-keycast-mode 1)
 ```
