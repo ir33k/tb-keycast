@@ -52,13 +52,6 @@ Toggle with `M-x tb-keycast-mode`.
 ;; to none sense and can be disabled.
 (setq tb-keycast-status-min-width 0)
 
-;; Modify face.
-(set-face-attribute 'tb-keycast-face nil
-                    :background "black"
-                    :foreground "#88FFAA"
-                    :slant 'normal
-                    :weight 'bold)
-
 ;; Modify list of ignored commands to control what not to show.
 ;; See variable documentation for more details.
 (setq tb-keycast-ignore '(minibuffer-cmd))
@@ -71,3 +64,5 @@ Toggle with `M-x tb-keycast-mode`.
 
 - Tested only on Emacs 29.0.
 - Counter does not work for `C-k (kill-line)`.
+- Big thanks to thuna\` from #emacs@libera for help with
+  `tb-keycast-format` type description.
