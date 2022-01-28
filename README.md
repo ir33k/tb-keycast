@@ -11,7 +11,12 @@ use them to have `tb-keycast` status enabled.
 
 **Variable `tab-bar-format` introduced in Emacs 28.1 is required.**
 
-![demo](demo.gif)
+![demo.gif](demo.gif)
+
+See [examples.el](./examples.el) file used in [demo.gif](demo.gif) to
+learn about customizations.  Read variables documentation with `C-h v`
+to learn more or use `M-x customize-group<RET>tb-keycast<RET>` to
+customize using GUI interface.
 
 ## Installation and usage
 
@@ -39,26 +44,6 @@ Use `M-x load-file<RET>path_to/tb-keycast.el<RET>` or load with code:
 ```
 
 Toggle with `M-x tb-keycast-mode`.
-
-## Howto
-
-```elisp
-(setq tab-bar-format nil)               ; Hide tabs if not used.
-(setq tb-keycast-status-align 'left)    ; Align status to the left.
-
-;; Disable min-width that makes `tb-keycast' always reserve some space
-;; to avoid jumping from left to right.  But when tabs are hidden and
-;; `tb-keycast' status is aligned to the left then min-width has little
-;; to none sense and can be disabled.
-(setq tb-keycast-status-min-width 0)
-
-;; Modify list of ignored commands to control what not to show.
-;; See variable documentation for more details.
-(setq tb-keycast-ignore '(minibuffer-cmd))
-
-;; Enable `tb-keycast-mode'.
-(tb-keycast-mode 1)
-```
 
 ## Note
 

@@ -106,26 +106,23 @@ argument results in nil then item is ignored."
          (or (not (seq-contains-p tb-keycast-ignore 'minibuffer))
              (not (string-match (format ".+%s" this-command)
                                 (format "%s" (this-command-keys))))))
-
+    ;; TODO(irek): Counter does not work for kill-line (C-k).
+    (if (not (eq last-command this-command)) (setq tb-keycast--count 0))
+    (setq tb-keycast--count (1+ tb-keycast--count))
     (setq tb-keycast--key (key-description (this-command-keys)))
     (setq tb-keycast--cmd (format "%s" this-command))
-    ;; TODO(irek): Counter does not work for kill-line (C-k).
-    (setq tb-keycast--count (if (eq last-command this-command)
-                                (1+ tb-keycast--count) 1))
-
     ;; Set status value with last pressed key, counter and fun name.
-    (setq tb-keycast--str
-          (tb-keycast--format-to-string tb-keycast-format))
-
     ;; Apply min-width and margins.  Left margin in form of one empty
     ;; spece is used only if `tab-bar-format' is not nil and right
     ;; margin is to stop status face background color from going all
     ;; the way to the right window edge.
     (setq tb-keycast--str
-          (concat (if (not (eq tab-bar-format nil)) " ")
-                  (string-pad tb-keycast--str tb-keycast-min-width)
-                  " "))
-
+          (concat
+           (if (not (eq tab-bar-format nil)) " ")
+           (string-pad
+            (tb-keycast--format-to-string tb-keycast-format)
+            tb-keycast-min-width)
+           " "))
     ;; Invoke `force-mode-line-update' to updates tab-bar line.
     (force-mode-line-update)))
 
