@@ -1,6 +1,6 @@
 ;;; tb-keycast.el --- Tab Bar Keycast -*- lexical-binding: t -*-
 
-;; Version: 1.6
+;; Version: 1.7
 ;; Keywords: keycast, tab-bar
 ;; Author: irek <mail@gumen.pl>
 ;; URL: https://github.com/ir33k/tb-keycast
@@ -32,7 +32,7 @@
 
 (require 'tab-bar)
 
-(defconst tb-keycast-version "1.6" "Version of `tb-keycast-mode'.")
+(defconst tb-keycast-version "1.7" "Version of `tb-keycast-mode'.")
 (defvar tb-keycast--key "" "Last pressed key.")
 (defvar tb-keycast--count 1 "Last key repeat counter.")
 (defvar tb-keycast--cmd "" "Last used command name.")
