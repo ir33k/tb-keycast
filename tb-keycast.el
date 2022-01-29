@@ -150,7 +150,7 @@ FRAME-WIDTH and STATUS-WIDTH should be a pixel values."
      ;; Align to right if required.
      (if tb-keycast-align-right-p
          (propertize " " 'display
-                     `(space :align-to (,(- frame-width status-width)))))
+		     `(space :align-to (- right (,status-width)))))
      ;; Print keycast status string.
      tb-keycast--str)))
 
@@ -160,7 +160,6 @@ FRAME-WIDTH and STATUS-WIDTH should be a pixel values."
   (tab-bar-mode 1)
   (add-to-list 'tab-bar-format 'tb-keycast--format t)
   (add-hook 'pre-command-hook 'tb-keycast--update 90)
-  ;; TODO(irek): It would be nice to update keycast on frame resize.
   (tb-keycast--update))
 
 (defun tb-keycast--stop ()
