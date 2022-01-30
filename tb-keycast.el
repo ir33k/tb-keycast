@@ -59,8 +59,8 @@ Possible key values: `typing', `minibuffer'."
   "Align tb-keycast status to right if value is not nil."
   :group 'tb-keycast :type 'boolean)
 
-(defcustom tb-keycast-min-width 32
-  "Minimal width (in character) that is always taken by keycast status.
+(defcustom tb-keycast-min-width 224
+  "Minimal width (in pixels) that is always taken by keycast status.
 This helps avoid jumping of status to left and right and to next
 tab-bar line when there are more tabs.  Higher value makes
 jumping less frequent.  To disable use 0."
@@ -106,23 +106,22 @@ argument results in nil then item is ignored."
          (or (not (seq-contains-p tb-keycast-ignore 'minibuffer))
              (not (string-match (format ".+%s" this-command)
                                 (format "%s" (this-command-keys))))))
+    ;; TODO(irek): Handle C-u.
     ;; TODO(irek): Counter does not work for kill-line (C-k).
     (if (not (eq last-command this-command)) (setq tb-keycast--count 0))
     (setq tb-keycast--count (1+ tb-keycast--count))
     (setq tb-keycast--key (key-description (this-command-keys)))
     (setq tb-keycast--cmd (format "%s" this-command))
-    ;; Set status value with last pressed key, counter and fun name.
-    ;; Apply min-width and margins.  Left margin in form of one empty
-    ;; spece is used only if `tab-bar-format' is not nil and right
-    ;; margin is to stop status face background color from going all
-    ;; the way to the right window edge.
+    ;; Set status value with last pressed key, counter and cmd name.
+    ;; Left margin in (one empty spece) used only if `tab-bar-format'
+    ;; is not nil and right margin is to stop status face background
+    ;; color from going all the way to the right window edge.
     (setq tb-keycast--str
           (concat
            (if (not (eq tab-bar-format nil)) " ")
-           (string-pad
-            (tb-keycast--format-to-string tb-keycast-format)
-            tb-keycast-min-width)
+           (tb-keycast--format-to-string tb-keycast-format)
            " "))
+
     ;; Invoke `force-mode-line-update' to updates tab-bar line.
     (force-mode-line-update)))
 
@@ -130,10 +129,11 @@ argument results in nil then item is ignored."
   "Return `tab-bar-format' without `tb-keycast--format'."
   (seq-remove (lambda (x) (eq x 'tb-keycast--format)) tab-bar-format))
 
-(defun tb-keycast--format-wraps-p (frame-width status-width)
+(defun tb-keycast--format-wraps-p (status-width)
   "Return not nil if new status value will wrap to next line.
 FRAME-WIDTH and STATUS-WIDTH should be a pixel values."
-  (let* ((format-list (tab-bar-format-list (tb-keycast--format-clear)))
+  (let* ((frame-width (frame-pixel-width))
+         (format-list (tab-bar-format-list (tb-keycast--format-clear)))
          (tabs-text (mapconcat (lambda (x) (nth 2 x)) format-list))
          (tabs-width (string-pixel-width tabs-text)))
     (while (> tabs-width frame-width)
@@ -142,15 +142,14 @@ FRAME-WIDTH and STATUS-WIDTH should be a pixel values."
 
 (defun tb-keycast--format ()
   "Produce keycast format string for `tab-bar-format'."
-  (let ((frame-width (frame-pixel-width))
-        (status-width (string-pixel-width tb-keycast--str)))
+  (let* ((status-width (string-pixel-width tb-keycast--str))
+         (hpos (max tb-keycast-min-width status-width)))
     (concat
      ;; Move status to next line if tabs width would cause it to wrap.
-     (if (tb-keycast--format-wraps-p frame-width status-width) "\n")
+     (if (tb-keycast--format-wraps-p status-width) "\n")
      ;; Align to right if required.
      (if tb-keycast-align-right-p
-         (propertize " " 'display
-		     `(space :align-to (- right (,status-width)))))
+         (propertize " " 'display `(space :align-to (- right (,hpos)))))
      ;; Print keycast status string.
      tb-keycast--str)))
 
