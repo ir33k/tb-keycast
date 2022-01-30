@@ -39,7 +39,7 @@
 (defvar tb-keycast--str "" "Last keycast status string.")
 
 (defgroup tb-keycast nil "Tab Bar Keycast."
-  :prefix "tb-keycast-" :group 'environment :version "28.1")
+  :prefix "tb-keycast-" :group 'environment :version "29.1")
 
 (defcustom tb-keycast-format
   '((" %s " tb-keycast--key :inherit mode-line-highlight :weight bold)

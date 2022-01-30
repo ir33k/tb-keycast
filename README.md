@@ -9,7 +9,7 @@ Can be aligned to the right (default) or left side of `tab-bar-mode`
 line free space (after tabs).  Tabs may be hidden so you don't have to
 use them to have `tb-keycast` status enabled.
 
-**Variable `tab-bar-format` introduced in Emacs 28.1 is required.**
+**Emacs 29.1 is required.**
 
 ![demo.gif](demo.gif)
 
